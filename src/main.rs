@@ -1,15 +1,17 @@
 fn main() {
     let mut coin: String = String::new();
-    let result = std::io::stdin().read_line(&mut coin);
-    match result {
-        Ok(_) => {
-            let currency = get_currency_price(&coin);
-            println!("El precio es: {}", currency);
-        }
-        Err(error) => println!("Error: {}", error),
+    let _ = std::io::stdin().read_line(&mut coin).expect("An error ocurred.");
+    let result_currency = get_currency(&coin);
+    match result_currency {
+        Ok(price) => println!("The price of {} is {}", coin, price),
+        Err(error) => println!("An error ocurred: {}", error),
     }
 }
 
-fn get_currency_price(_coin: &str) -> String {
-    String::from("Test")
+fn get_currency(coin: &str) -> Result<String, ureq::Error> {
+    // Request for the current price of the coin
+    let body: String = ureq::get(&format!("https://api.coingecko.com/api/v3/coins/{}?localization=false", coin))
+        .call()?
+        .into_string()?;
+    Ok(body)
 }
